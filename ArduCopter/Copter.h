@@ -201,6 +201,7 @@ public:
     friend class AutoTune;
 
     friend class Mode;
+    friend class ModeMyController;
     friend class ModeAcro;
     friend class ModeAcro_Heli;
     friend class ModeAltHold;
@@ -722,6 +723,9 @@ private:
     void one_hz_loop();
     void init_simple_bearing();
     void update_simple_mode(void);
+
+    void func_1_Get_Pilot_Input();
+
     void update_super_simple_bearing(bool force_update);
     void read_AHRS(void);
     void update_altitude();
@@ -1023,6 +1027,7 @@ private:
     void userhook_auxSwitch1(const RC_Channel::AuxSwitchPos ch_flag);
     void userhook_auxSwitch2(const RC_Channel::AuxSwitchPos ch_flag);
     void userhook_auxSwitch3(const RC_Channel::AuxSwitchPos ch_flag);
+    void Custom_function();
 
 #if MODE_ACRO_ENABLED
 #if FRAME_CONFIG == HELI_FRAME
@@ -1105,7 +1110,9 @@ private:
 #if MODE_TURTLE_ENABLED
     ModeTurtle mode_turtle;
 #endif
-
+#if MODE_MYCONTROLLER_ENABLED
+    ModeMyController mode_mycontroller; // My controller mode
+#endif
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);
     void exit_mode(Mode *&old_flightmode, Mode *&new_flightmode);

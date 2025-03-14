@@ -1,6 +1,18 @@
 #include "Copter.h"
 
-/*
+////////    Define Variables to Get Pilot inputs
+
+float pilot_roll        = 0.0;
+float pilot_pitch       = 0.0;
+float pilot_yaw         = 0.0;
+float pilot_throttle    = 0.0;
+
+float pilot_ch5         = 0.0;
+float pilot_ch6         = 0.0;
+float pilot_ch7         = 0.0;
+float pilot_ch8         = 0.0;
+
+/* 
  * Init and run calls for stabilize flight mode
  */
 
@@ -8,6 +20,13 @@
 // should be called at 100hz or more
 void ModeStabilize::run()
 {
+
+    //////    Call function to read pilot inputs
+    // func_1_Get_Pilot_Input();
+
+
+
+
     // apply simple mode transform to pilot inputs
     update_simple_mode();
 
@@ -68,3 +87,8 @@ void ModeStabilize::run()
     // output pilot's throttle
     attitude_control->set_throttle_out(pilot_desired_throttle, true, g.throttle_filt);
 }
+
+// void Copter::func_1_Get_Pilot_Input()
+// {
+
+// }

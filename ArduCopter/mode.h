@@ -100,6 +100,7 @@ public:
         AUTOROTATE =   26,  // Autonomous autorotation
         AUTO_RTL =     27,  // Auto RTL, this is not a true mode, AUTO will report as this mode if entered to perform a DO_LAND_START Landing sequence
         TURTLE =       28,  // Flip over after crash
+        MYCONTROLLER=  29,  // 
 
         // Mode number 30 reserved for "offboard" for external/lua control.
 
@@ -400,6 +401,57 @@ public:
     // end pass-through functions
 };
 
+
+class ModeMyController : public Mode {   // my controller new added
+
+    public:
+        // inherit constructor
+        using Mode::Mode;
+        Number mode_number() const override { return Number::MYCONTROLLER; }
+        
+        bool init(bool) override;
+    
+        void run() override;
+    
+        bool requires_GPS() const override { return false; }
+        bool has_manual_throttle() const override { return true; }
+        bool allows_arming(AP_Arming::Method method) const override { return true; };
+        bool is_autopilot() const override { return false; }
+        bool allows_save_trim() const override { return true; }
+        bool allows_autotune() const override { return true; }
+        bool allows_flip() const override { return true; }
+        void pilot_input();
+        void channel_arming();
+        void imu_read();
+        void battery_check();
+        void motor_pwm(uint8_t);
+        void custom_PD_controller(float des_phi, float des_theta, float des_psi,float des_phi_dot, float des_theta_dot, float des_psi_dot, float des_z, float des_z_dot);
+        void custom_PID_controller(float des_phi, float des_theta, float des_psi,float des_phi_dot, float des_theta_dot, float des_psi_dot, float des_z, float des_z_dot);
+        int Inverse_thrust_function(float Force);
+        void custom_pwm_code();
+        float saturation_for_yaw_angle_error(float error);
+        float saturation_for_roll_pitch_angle_error(float error);
+        float saturation_for_altitude_error(float z);
+        float sat_I_gain_ph_th(float sum);
+        float sat_I_gain_psi(float sum);
+        void thrust_measurement_code();
+        float Traj_plan_roll(float error);
+        void Nodemcu_data();
+        void quad_states();
+        void PID_pos_controller(float des_phi, float des_theta, float des_psi,float des_phi_dot, float des_theta_dot, float des_psi_dot, float des_z, float des_z_dot);
+        void system_identification_x_axis();
+        void system_identification_y_axis();
+        void system_identification_z_axis();
+        void custom_PID_position_controller();
+    
+    protected:
+    
+        const char *name() const override { return "MYCONTROLLER"; }
+        const char *name4() const override { return "MYCR"; }
+    
+    private:
+    
+    };
 
 #if MODE_ACRO_ENABLED
 class ModeAcro : public Mode {
