@@ -723,9 +723,6 @@ private:
     void one_hz_loop();
     void init_simple_bearing();
     void update_simple_mode(void);
-
-    void func_1_Get_Pilot_Input();
-
     void update_super_simple_bearing(bool force_update);
     void read_AHRS(void);
     void update_altitude();

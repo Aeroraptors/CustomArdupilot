@@ -1711,6 +1711,7 @@ public:
     bool allows_auto_trim() const override { return true; }
     bool allows_autotune() const override { return true; }
     bool allows_flip() const override { return true; }
+    void func_1_Get_Pilot_Input();
 
 protected:
 

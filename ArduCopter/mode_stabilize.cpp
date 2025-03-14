@@ -22,7 +22,7 @@ void ModeStabilize::run()
 {
 
     //////    Call function to read pilot inputs
-    // func_1_Get_Pilot_Input();
+    func_1_Get_Pilot_Input();
 
 
 
@@ -88,7 +88,7 @@ void ModeStabilize::run()
     attitude_control->set_throttle_out(pilot_desired_throttle, true, g.throttle_filt);
 }
 
-// void Copter::func_1_Get_Pilot_Input()
-// {
+void ModeStabilize::func_1_Get_Pilot_Input()
+{
 
-// }
+}
