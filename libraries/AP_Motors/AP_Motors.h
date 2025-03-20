@@ -1,5 +1,10 @@
 #pragma once
 
+extern uint16_t PWM1_Custom;
+extern uint16_t PWM2_Custom;
+extern uint16_t PWM3_Custom;
+extern uint16_t PWM4_Custom;
+
 #include "AP_Motors_Class.h"
 #include "AP_MotorsMulticopter.h"
 #include "AP_MotorsMatrix.h"

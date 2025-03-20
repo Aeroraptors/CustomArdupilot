@@ -1711,7 +1711,17 @@ public:
     bool allows_auto_trim() const override { return true; }
     bool allows_autotune() const override { return true; }
     bool allows_flip() const override { return true; }
-    void func_1_Get_Pilot_Input();
+    // list of main functions
+    void function_1_Get_Pilot_Input();
+    void function_2_Bydefault_Stabilize_code();
+    void function_3_Getting_Drone_States();
+    // list of math functions
+    Matrix3f math_function_1_eulerAnglesToRotationMatrix(Vector3f rpy);
+    Matrix3f math_function_2_matrix_transpose(Matrix3f R);
+    Vector3f math_function_3_vee_map(Matrix3f R);
+    Vector3f math_function_4_Matrix_vector_mul(Matrix3f R, Vector3f v);
+    Vector3f math_function_5_e_R(Matrix3f R, Matrix3f Rd);
+    Vector3f math_function_6_e_Omega(Matrix3f R, Matrix3f Rd, Vector3f Omega, Vector3f Omegad);
 
 protected:
 

@@ -16,6 +16,7 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_MotorsMatrix.h"
 #include <AP_Vehicle/AP_Vehicle_Type.h>
+#include "AP_Motors.h"
 
 extern const AP_HAL::HAL& hal;
 
@@ -174,12 +175,31 @@ void AP_MotorsMatrix::output_to_motors()
             break;
     }
 
+    // // convert output to PWM and send to each motor
+    // for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
+    //     if (motor_enabled[i]) {
+    //         rc_write(i, output_to_pwm(_actuator[i]));
+    //     }
+    // }
+
+    float pilot_ch5_local  = RC_Channels::get_radio_in(CH_5);        // 1000 to 2000
+    float pilot_ch6_local  = RC_Channels::get_radio_in(CH_6);        // 1000 to 2000
+
     // convert output to PWM and send to each motor
     for (i = 0; i < AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
-            rc_write(i, output_to_pwm(_actuator[i]));
+            if (pilot_ch6_local > 1500 && pilot_ch5_local < 1230)
+            {
+                rc_write(0, PWM1_Custom);
+                rc_write(1, PWM2_Custom);
+                rc_write(2, PWM3_Custom);
+                rc_write(3, PWM4_Custom);
+            }else{
+                rc_write(i, output_to_pwm(_actuator[i]));
+            }
         }
     }
+
 }
 
 // get_motor_mask - returns a bitmask of which outputs are being used for motors (1 means being used)

@@ -1,4 +1,5 @@
 #include "Copter.h"
+#include <AP_Motors/AP_Motors.h>
 
 ////////    Define Variables to Get Pilot inputs
 
@@ -12,6 +13,27 @@ float pilot_ch6         = 0.0;
 float pilot_ch7         = 0.0;
 float pilot_ch8         = 0.0;
 
+float quad_roll         = 0.0;      // degrees 
+float quad_pitch        = 0.0;      // degrees 
+float quad_yaw          = 0.0;      // degrees 
+float quad_roll_dot     = 0.0;      // degrees/second
+float quad_pitch_dot    = 0.0;      // degrees/second
+float quad_yaw_dot      = 0.0;      // degrees/second
+
+float quad_x            = 0.0;      // m
+float quad_y            = 0.0;      // m
+float quad_z            = 0.0;      // m
+float quad_x_dot        = 0.0;      // m/s
+float quad_y_dot        = 0.0;      // m/s
+float quad_z_dot        = 0.0;      // m/s
+
+////////    Define Variables to Initialize the PWM Signals
+
+uint16_t PWM1_Custom = 1000;
+uint16_t PWM2_Custom = 1000;
+uint16_t PWM3_Custom = 1000;
+uint16_t PWM4_Custom = 1000;
+
 /* 
  * Init and run calls for stabilize flight mode
  */
@@ -22,11 +44,54 @@ void ModeStabilize::run()
 {
 
     //////    Call function to read pilot inputs
-    func_1_Get_Pilot_Input();
+    function_1_Get_Pilot_Input();
 
+    if ( pilot_ch6 < 1500 && pilot_ch5 < 1230)
+    {
+        function_2_Bydefault_Stabilize_code();
+        hal.console->printf("Hi From by Default Code\n");
+    }
+    else if (pilot_ch6 > 1500 && pilot_ch5 < 1230)
+    {
+        // hal.console->printf("Hi From Custom Created Code\n");
+        function_3_Getting_Drone_States();
+        
+        if (copter.motors->armed()){
+            PWM1_Custom = 1200;
+            PWM2_Custom = 1400;
+            PWM3_Custom = 1600;
+            PWM4_Custom = 1800;
+        }else{
+            PWM1_Custom = 1000;
+            PWM2_Custom = 1000;
+            PWM3_Custom = 1000;
+            PWM4_Custom = 1000;
+        }
 
+    }
 
+}
 
+void ModeStabilize::function_1_Get_Pilot_Input()
+{
+    pilot_roll      = channel_roll->get_control_in();         // -4500 to 4500
+    pilot_pitch     = channel_pitch->get_control_in();        // -4500 to 4500
+    pilot_yaw       = channel_yaw->get_control_in();          // -4500 to 4500
+    pilot_throttle  = channel_throttle->get_control_in();     //     0 to 1000
+
+    // hal.console->printf("Roll- %3.3f, Pitch- %3.3f, Yaw- %3.3f, Throttle- %3.3f, ", pilot_roll, pilot_pitch, pilot_yaw, pilot_throttle);
+
+    pilot_ch5       = RC_Channels::get_radio_in(CH_5);        // 1000 to 2000
+    pilot_ch6       = RC_Channels::get_radio_in(CH_6);        // 1000 to 2000
+    pilot_ch7       = RC_Channels::get_radio_in(CH_7);        // 1000 to 2000
+    pilot_ch8       = RC_Channels::get_radio_in(CH_8);        // 1000 to 2000
+
+    // hal.console->printf("Ch5- %3.3f, Ch6- %3.3f, Ch7- %3.3f, Ch8- %3.3f\n", pilot_ch5, pilot_ch6, pilot_ch7, pilot_ch8);
+
+}
+
+void ModeStabilize::function_2_Bydefault_Stabilize_code()
+{
     // apply simple mode transform to pilot inputs
     update_simple_mode();
 
@@ -86,9 +151,98 @@ void ModeStabilize::run()
 
     // output pilot's throttle
     attitude_control->set_throttle_out(pilot_desired_throttle, true, g.throttle_filt);
+
 }
 
-void ModeStabilize::func_1_Get_Pilot_Input()
+void ModeStabilize::function_3_Getting_Drone_States()
+{
+    // position in inertial frame of reference
+    quad_x =   inertial_nav.get_position_neu_cm().x / 100.0;         // m
+    quad_y =  -inertial_nav.get_position_neu_cm().y / 100.0;         // m
+    quad_z =   inertial_nav.get_position_neu_cm().z / 100.0;         // m
+
+    // linear velocity in inertial frame of reference
+    quad_x_dot =   inertial_nav.get_velocity_neu_cms().x /100.0;     // m/s
+    quad_y_dot =  -inertial_nav.get_velocity_neu_cms().y /100.0;     // m/s
+    quad_z_dot =   inertial_nav.get_velocity_neu_cms().z /100.0;     // m/s
+
+    // hal.console->printf("Quad_Pos_Vel -> %3.3f, %3.3f, %3.3f, %3.3f, %3.3f, %3.3f \n", quad_x, quad_y, quad_z, quad_x_dot, quad_y_dot, quad_z_dot);
+
+    quad_roll        =          (ahrs.roll_sensor)   / 100.0;     // degrees 
+    quad_pitch       =        -(ahrs.pitch_sensor)   / 100.0;     // degrees 
+    quad_yaw         =  360.0 -  (ahrs.yaw_sensor)   / 100.0;     // degrees 
+    quad_roll_dot    =         (ahrs.get_gyro().x);               // degrees/second
+    quad_pitch_dot   =        -(ahrs.get_gyro().y);               // degrees/second    
+    quad_yaw_dot     =        -(ahrs.get_gyro().z);               // degrees/second
+
+    // hal.console->printf("Quad_RPY -> %3.3f, %3.3f, %3.3f, %3.3f, %3.3f, %3.3f \n", quad_roll, quad_pitch, quad_yaw, quad_roll_dot, quad_pitch_dot, quad_yaw_dot);
+}
+
+Matrix3f ModeStabilize::math_function_1_eulerAnglesToRotationMatrix(Vector3f rpy)
 {
 
+    // make sure the arguments of rpy[0], rpy[1], and rpy[2] are in radians.
+
+    // Calculate rotation about x axis
+   Matrix3f R_x (
+              1,       0,              0,
+              0,       cosf(rpy[0]),   -sinf(rpy[0]),
+              0,       sinf(rpy[0]),   cosf(rpy[0])
+              );
+
+   // Calculate rotation about y axis
+   Matrix3f R_y (
+              cosf(rpy[1]),    0,      sinf(rpy[1]),
+              0,               1,      0,
+              -sinf(rpy[1]),   0,      cosf(rpy[1])
+              );
+
+   // Calculate rotation about z axis
+   Matrix3f R_z (
+              cosf(rpy[2]),    -sinf(rpy[2]),      0,
+              sinf(rpy[2]),    cosf(rpy[2]),       0,
+              0,               0,                  1);
+
+   // Combined rotation matrix
+   Matrix3f R = R_z * R_y * R_x;
+
+   return R;
+}
+
+Matrix3f ModeStabilize::math_function_2_matrix_transpose(Matrix3f R)
+{
+    Matrix3f R_T(
+            R[0][0],R[1][0],R[2][0],
+            R[0][1],R[1][1],R[2][1],
+            R[0][2],R[1][2],R[2][2]
+            );
+    return R_T;
+}
+
+Vector3f ModeStabilize::math_function_3_vee_map(Matrix3f R)
+{
+    Vector3f vector(R[2][1],R[0][2],R[1][0]);
+    return vector;
+}
+
+Vector3f ModeStabilize::math_function_4_Matrix_vector_mul(Matrix3f R, Vector3f v)
+{
+    Vector3f mul_vector(
+                        R[0][0]*v[0] + R[0][1]*v[1] + R[0][2]*v[2] ,
+                        R[1][0]*v[0] + R[1][1]*v[1] + R[1][2]*v[2] ,
+                        R[2][0]*v[0] + R[2][1]*v[1] + R[2][2]*v[2]
+                        );
+    return mul_vector;
+}
+
+Vector3f ModeStabilize::math_function_5_e_R(Matrix3f R, Matrix3f Rd)
+{
+    Vector3f error_vec(math_function_3_vee_map(math_function_2_matrix_transpose(Rd)*R - math_function_2_matrix_transpose(R)*Rd));
+    return error_vec;
+}
+
+Vector3f ModeStabilize::math_function_6_e_Omega(Matrix3f R, Matrix3f Rd, Vector3f Omega, Vector3f Omegad)
+{
+    Vector3f error_vec(Omega - (math_function_2_matrix_transpose(R)*Rd)*Omegad);
+    return error_vec;
 }
