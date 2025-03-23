@@ -178,6 +178,8 @@ void ModeStabilize::function_3_Getting_Drone_States()
     // hal.console->printf("Quad_RPY -> %3.3f, %3.3f, %3.3f, %3.3f, %3.3f, %3.3f \n", quad_roll, quad_pitch, quad_yaw, quad_roll_dot, quad_pitch_dot, quad_yaw_dot);
 }
 
+
+
 Matrix3f ModeStabilize::math_function_1_eulerAnglesToRotationMatrix(Vector3f rpy)
 {
 
