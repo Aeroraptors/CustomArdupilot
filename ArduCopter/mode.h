@@ -1715,6 +1715,8 @@ public:
     void function_1_Get_Pilot_Input();
     void function_2_Bydefault_Stabilize_code();
     void function_3_Getting_Drone_States();
+    void function_4_PWM_Generation(float F, float Mb1, float Mb2, float Mb3);
+
     // list of math functions
     Matrix3f math_function_1_eulerAnglesToRotationMatrix(Vector3f rpy);
     Matrix3f math_function_2_matrix_transpose(Matrix3f R);
