@@ -1716,6 +1716,9 @@ public:
     void function_2_Bydefault_Stabilize_code();
     void function_3_Getting_Drone_States();
     void function_4_PWM_Generation(float F, float Mb1, float Mb2, float Mb3);
+    void function_5_Nonlinear_Geometric_Control();
+    float function_6_Bounds_on_XY_des(float value);
+    float function_7_Bounds_on_Z_des(float value);
 
     // list of math functions
     Matrix3f math_function_1_eulerAnglesToRotationMatrix(Vector3f rpy);
@@ -1724,6 +1727,10 @@ public:
     Vector3f math_function_4_Matrix_vector_mul(Matrix3f R, Vector3f v);
     Vector3f math_function_5_e_R(Matrix3f R, Matrix3f Rd);
     Vector3f math_function_6_e_Omega(Matrix3f R, Matrix3f Rd, Vector3f Omega, Vector3f Omegad);
+    Vector3f math_function_7_e_X();
+    Vector3f math_function_8_e_X_dot();
+    float math_function_9_norm_of_vec(Vector3f vec_);
+    Matrix3f math_function_10_hatmap(Vector3f v);
 
 protected:
 
